@@ -4,7 +4,7 @@ C++ Mathematical Expression Toolkit Library
 The C++ Mathematical Expression Library  (ExprTk) is a simple to  use,
 easy  to  integrate and  extremely  efficient mathematical  expression
 parsing and  evaluation engine.  The parsing  engine supports  various
-kinds of  functional, logic  processing semantics  and is  very easily
+kinds of functional and logic  processing semantics and is very easily
 extendible.
 
 
@@ -17,14 +17,14 @@ operations, functions and processes:
 
 (2) Functions:       min, max, avg, sum, abs, ceil, floor, round,
                      roundn, exp, log, log10, logn, root, sqrt,
-                     clamp, inrange, sgn, erf, erfc
+                     clamp, inrange, sgn, erf, erfc, frac, trunc
 
 (3) Trigonometry:    sin, cos, tan, acos, asin, atan, atan2, cosh,
                      cot, csc, sec, sinh, tanh, rad2deg, deg2rad,
                      deg2grad, grad2deg, hyp
 
 (4) Equalities &
-    Inequalities:    =, ==, <>, !=, <, <=, >, >=,
+    Inequalities:    =, ==, <>, !=, <, <=, >, >=
 
 (5) Boolean logic:   and, or, xor, not, nand, nor, shr, shl, true,
                      false
@@ -32,7 +32,12 @@ operations, functions and processes:
 (6) Conditional &
     Loop statement:  if-then-else, while
 
-(7) Assigment:       :=
+(7) Assignment:      :=
+
+(8) Calculus:        numerical integration and differentiation
+
+Note 1: Normal mathematical operator precedence is applied (BEDMAS).
+Note 2: The trigonometry functions assume radians as input.
 
 
 
@@ -48,7 +53,7 @@ expressions that can be parsed and evaluated using the ExprTk library.
 (06) ({1/1}*[1/2]+(1/3))-{1/4}^[1/5]+(1/6)-({1/7}+[1/8]*(1/9))
 (07) a * exp(2 * t) + c
 (08) z := x + sin(2 * pi / y)
-(09) u <- 2 * (pi * z) / (w := x + cos(y / pi))
+(09) u := 2 * (pi * z) / (w := x + cos(y / pi))
 (10) 2x + 3y + 4z + 5w == 2 * x + 3 * y + 4 * z + 5 * w
 (11) 3(x + y) / 2 + 1 == 3 * (x + y) / 2 + 1
 (12) (x + y)3 + 1 / 4 == (x + y) * 3 + 1 / 4
@@ -97,6 +102,7 @@ Expression Library can be found at:
 (*) GNU Compiler Collection (4.3+)
 (*) Intel® C++ Compiler (9.x+)
 (*) Clang/LLVM (1.1+)
+(*) PGI C++ (10.x+)
 (*) Microsoft Visual Studio C++ Compiler (8.1+)
 (*) Comeau C++ Compiler (4.3+)
 
@@ -114,98 +120,123 @@ form by reducing the total number  of nodes in the evaluation tree  of
 an  expression  and  by  also  leveraging  the  compiler's  ability to
 correctly optimize such expressions for a given architecture.
 
-         3-Parameter                     4-Parameter
- | Prototype  |  Operation  |  | Prototype    |     Operation    |
- +------------+-------------+  +--------------+------------------+
-  sf00(x,y,z) | (x + y) / z     sf26(x,y,z,w) | w + ((x + y) / z)
-  sf01(x,y,z) | (x + y) * z     sf27(x,y,z,w) | w + ((x + y) * z)
-  sf02(x,y,z) | (x - y) / z     sf28(x,y,z,w) | w + ((x - y) / z)
-  sf03(x,y,z) | (x - y) * z     sf29(x,y,z,w) | w + ((x - y) * z)
-  sf04(x,y,z) | (x * y) + z     sf30(x,y,z,w) | w + ((x * y) / z)
-  sf05(x,y,z) | (x * y) - z     sf31(x,y,z,w) | w + ((x * y) * z)
-  sf06(x,y,z) | (x * y) / z     sf32(x,y,z,w) | w + ((x / y) + z)
-  sf07(x,y,z) | (x * y) * z     sf33(x,y,z,w) | w + ((x / y) / z)
-  sf08(x,y,z) | (x / y) + z     sf34(x,y,z,w) | w + ((x / y) * z)
-  sf09(x,y,z) | (x / y) - z     sf35(x,y,z,w) | w - ((x + y) / z)
-  sf10(x,y,z) | (x / y) / z     sf36(x,y,z,w) | w - ((x + y) * z)
-  sf11(x,y,z) | (x / y) * z     sf37(x,y,z,w) | w - ((x - y) / z)
-  sf12(x,y,z) | z / (x + y)     sf38(x,y,z,w) | w - ((x - y) * z)
-  sf13(x,y,z) | z / (x - y)     sf39(x,y,z,w) | w - ((x * y) / z)
-  sf14(x,y,z) | z / (x * y)     sf40(x,y,z,w) | w - ((x * y) * z)
-  sf15(x,y,z) | z / (x / y)     sf41(x,y,z,w) | w - ((x / y) / z)
-  sf16(x,y,z) | z - (x / y)     sf42(x,y,z,w) | w - ((x / y) * z)
-  sf17(x,y,z) | z - (x / y)     sf43(x,y,z,w) | ((x + y) * z) - w
-  sf18(x,y,z) | x * y^2 + z     sf44(x,y,z,w) | ((x - y) * z) - w
-  sf19(x,y,z) | x * y^3 + z     sf45(x,y,z,w) | ((x * y) * z) - w
-  sf20(x,y,z) | x * y^4 + z     sf46(x,y,z,w) | ((x / y) * z) - w
-  sf21(x,y,z) | x * y^5 + z     sf47(x,y,z,w) | ((x + y) / z) - w
-  sf22(x,y,z) | x * y^6 + z     sf48(x,y,z,w) | ((x - y) / z) - w
-  sf23(x,y,z) | x * y^7 + z     sf49(x,y,z,w) | ((x * y) / z) - w
-  sf24(x,y,z) | x * y^8 + z     sf50(x,y,z,w) | ((x / y) / z) - w
-  sf25(x,y,z) | x * y^9 + z     sf51(x,y,z,w) | x * y^2 + z * w^2
-                                sf52(x,y,z,w) | x * y^3 + z * w^3
-                                sf53(x,y,z,w) | x * y^4 + z * w^4
-                                sf54(x,y,z,w) | x * y^5 + z * w^5
-                                sf55(x,y,z,w) | x * y^6 + z * w^6
-                                sf56(x,y,z,w) | x * y^7 + z * w^7
-                                sf57(x,y,z,w) | x * y^8 + z * w^8
-                                sf58(x,y,z,w) | x * y^9 + z * w^9
+          3-Parameter                       4-Parameter
+ +-------------+-------------+    +--------------+------------------+
+ |  Prototype  |  Operation  |    |  Prototype   |    Operation     |
+ +-------------+-------------+    +--------------+------------------+
+   $f00(x,y,z) |  (x + y) / z      $f46(x,y,z,w) | x + ((y + z) / w)
+   $f01(x,y,z) |  (x + y) * z      $f47(x,y,z,w) | x + ((y + z) * w)
+   $f02(x,y,z) |  (x + y) - z      $f48(x,y,z,w) | x + ((y - z) / w)
+   $f03(x,y,z) |  (x + y) + z      $f49(x,y,z,w) | x + ((y - z) * w)
+   $f04(x,y,z) |  (x - y) / z      $f50(x,y,z,w) | x + ((y * z) / w)
+   $f05(x,y,z) |  (x - y) * z      $f51(x,y,z,w) | x + ((y * z) * w)
+   $f06(x,y,z) |  (x * y) + z      $f52(x,y,z,w) | x + ((y / z) + w)
+   $f07(x,y,z) |  (x * y) - z      $f53(x,y,z,w) | x + ((y / z) / w)
+   $f08(x,y,z) |  (x * y) / z      $f54(x,y,z,w) | x + ((y / z) * w)
+   $f09(x,y,z) |  (x * y) * z      $f55(x,y,z,w) | x - ((y + z) / w)
+   $f10(x,y,z) |  (x / y) + z      $f56(x,y,z,w) | x - ((y + z) * w)
+   $f11(x,y,z) |  (x / y) - z      $f57(x,y,z,w) | x - ((y - z) / w)
+   $f12(x,y,z) |  (x / y) / z      $f58(x,y,z,w) | x - ((y - z) * w)
+   $f13(x,y,z) |  (x / y) * z      $f59(x,y,z,w) | x - ((y * z) / w)
+   $f14(x,y,z) |  x / (y + z)      $f60(x,y,z,w) | x - ((y * z) * w)
+   $f15(x,y,z) |  x / (y - z)      $f61(x,y,z,w) | x - ((y / z) / w)
+   $f16(x,y,z) |  x / (y * z)      $f62(x,y,z,w) | x - ((y / z) * w)
+   $f17(x,y,z) |  x / (y / z)      $f63(x,y,z,w) | ((x + y) * z) - w
+   $f18(x,y,z) |  x * (y + z)      $f64(x,y,z,w) | ((x - y) * z) - w
+   $f19(x,y,z) |  x * (y - z)      $f65(x,y,z,w) | ((x * y) * z) - w
+   $f20(x,y,z) |  x * (y * z)      $f66(x,y,z,w) | ((x / y) * z) - w
+   $f21(x,y,z) |  x * (y / z)      $f67(x,y,z,w) | ((x + y) / z) - w
+   $f22(x,y,z) |  x - (y / z)      $f68(x,y,z,w) | ((x - y) / z) - w
+   $f23(x,y,z) |  x - (y / z)      $f69(x,y,z,w) | ((x * y) / z) - w
+   $f24(x,y,z) |  x - (y * z)      $f70(x,y,z,w) | ((x / y) / z) - w
+   $f25(x,y,z) |  x + (y * z)      $f71(x,y,z,w) | (x * y) + (z * w)
+   $f26(x,y,z) |  x + (y / z)      $f72(x,y,z,w) | (x * y) - (z * w)
+   $f27(x,y,z) |  x + (y + z)      $f73(x,y,z,w) | (x * y) + (z / w)
+   $f28(x,y,z) |  x + (y - z)      $f74(x,y,z,w) | (x * y) - (z / w)
+   $f29(x,y,z) |  x * y^2 + z      $f75(x,y,z,w) | (x / y) + (z / w)
+   $f30(x,y,z) |  x * y^3 + z      $f76(x,y,z,w) | (x / y) - (z / w)
+   $f31(x,y,z) |  x * y^4 + z      $f77(x,y,z,w) | (x / y) - (z * w)
+   $f32(x,y,z) |  x * y^5 + z      $f78(x,y,z,w) | x / (y + (z * w))
+   $f33(x,y,z) |  x * y^6 + z      $f79(x,y,z,w) | x / (y - (z * w))
+   $f34(x,y,z) |  x * y^7 + z      $f80(x,y,z,w) | x * (y + (z * w))
+   $f35(x,y,z) |  x * y^8 + z      $f81(x,y,z,w) | x * (y - (z * w))
+   $f36(x,y,z) |  x * y^9 + z      $f82(x,y,z,w) | x * y^2 + z * w^2
+   $f37(x,y,z) |  x * log(y)+z     $f83(x,y,z,w) | x * y^3 + z * w^3
+   $f38(x,y,z) |  x * log(y)-z     $f84(x,y,z,w) | x * y^4 + z * w^4
+   $f39(x,y,z) |  x * log10(y)+z   $f85(x,y,z,w) | x * y^5 + z * w^5
+   $f40(x,y,z) |  x * log10(y)-z   $f86(x,y,z,w) | x * y^6 + z * w^6
+   $f41(x,y,z) |  x * sin(y)+z     $f87(x,y,z,w) | x * y^7 + z * w^7
+   $f42(x,y,z) |  x * sin(y)-z     $f88(x,y,z,w) | x * y^8 + z * w^8
+   $f43(x,y,z) |  x * cos(y)+z     $f89(x,y,z,w) | x * y^9 + z * w^9
+   $f44(x,y,z) |  x * cos(y)-z     $f90(x,y,z,w) | (x and y) ? z : w
+   $f45(x,y,z) |  x ? y : z        $f91(x,y,z,w) | (x  or y) ? z : w
+                                   $f92(x,y,z,w) | (x <   y) ? z : w
+                                   $f93(x,y,z,w) | (x <=  y) ? z : w
+                                   $f94(x,y,z,w) | (x >   y) ? z : w
+                                   $f95(x,y,z,w) | (x >=  y) ? z : w
+                                   $f96(x,y,z,w) | (x ==  y) ? z : w
+                                   $f97(x,y,z,w) | x*sin(y) + z*cos(w)
 
 
 
-[MACROS]
-ExprTk utilizes certain macros  to modify the underlying  behaviour of
-the parser and the evaluation engine. The following macros are used to
-switch off certain capabilities  within the ExprTk evaluation  engine.
-The capabilities are predominantly related to expression optimisations
-and the ability to evaluate strings within expressions.
+[SIMPLE EXAMPLE]
+--- snip ---
+#include <cstdio>
+#include <string>
 
-(1) exprtk_disable_string_capabilities
-(2) exprtk_disable_cardinal_pow_optimisation
-(3) exprtk_disable_extended_optimisations
-(4) exprtk_disable_extended_operator_optimizations
+#include "exprtk.hpp"
 
-(1) "exprtk_disable_string_capabilities"
-If defined, the macro will disable all string processing capabilities.
-When defined, if an expression  containing a string or string  related
-action  is  encountered,  a compilation  error will  be raised  by the
-parser.
+int main()
+{
+   typedef exprtk::symbol_table<double> symbol_table_t;
+   typedef exprtk::expression<double>     expression_t;
+   typedef exprtk::parser<double>             parser_t;
+   typedef exprtk::parser_error::type          error_t;
 
-(2) "exprtk_disable_cardinal_pow_optimisation"
-If  defined,  the  macro  will  disable  the  special  case  regarding
-exponentiation  of  a  variable  to  an  integer  constant  (where the
-constant is  <= 60).  Defining this  variable may  be desirable if the
-error magnitude of the results using this special case are intolerable
-with regards to the precision required. When defined, the pow function
-used for all other powers will be invoked.
+   std::string expression_str = "z := 2 [sin(x/pi)^3 + cos(pi/y)^4]";
 
-(3) "exprtk_disable_extended_optimisations"
-If defined, the macro will disable the third tier optimisations.  This
-group of  optimisations creates  roughly 4K  type instantiations. This
-large number of type and branch instantiations in one translation unit
-may cause some  older compilers to  crash or not  be able to  properly
-compile  ExprTk.  If  such compiler  problems  are  encountered it  is
-recommended to test  having this particular  macro defined. It  should
-also  be noted  that some  of the  third tier  optimisations are  also
-available through  the predefined  'special functions',  however these
-require that expressions utilize them explicitly.
+   double x = 1.1;
+   double y = 2.2;
+   double z = 3.3;
 
-(4) "exprtk_disable_extended_operator_optimizations"
-By default most of the mathematical operators are included as part  of
-the optimisation process. However if this macro is defined, then  only
-the basic mathematical operators (+,-,*,/,^) will be included.
+   symbol_table_t symbol_table;
+   symbol_table.add_constants();
+   symbol_table.add_variable("x",x);
+   symbol_table.add_variable("y",y);
+   symbol_table.add_variable("z",z);
 
-(5) "exprtk_lean_and_mean"
-The default mode  of ExprTk is  lean and mean.  This macro encompasses
-both modes [3] and [4].
+   expression_t expression;
+   expression.register_symbol_table(symbol_table);
 
-(6) "exprtk_lean_and_mean_numeric_only"
-The mode when this macro is  defined, is 'lean and mean' coupled  with
-all string capabilities disabled [1].
+   parser_t parser;
 
-Note:  Foregoing  a  few  extra  clock  cycles  during  compilation in
-exchange  for a  dramatic increase in performance  during run-time  is
-always a worthy undertaking.
+   if (!parser.compile(expression_str,expression))
+   {
+      printf("Error: %s\tExpression: %s\n",
+             parser.error().c_str(),
+             expression_str.c_str());
+
+      for (std::size_t i = 0; i < parser.error_count(); ++i)
+      {
+         error_t error = parser.get_error(i);
+         printf("Err: %02d Pos: %02d Type: [%s] Msg: %s Expr: %s\n",
+                static_cast<int>(i),
+                static_cast<int>(error.token.position),
+                exprtk::parser_error::to_str(error.mode).c_str(),
+                error.diagnostic.c_str(),
+                expression_str.c_str());
+      }
+
+      return 1;
+   }
+
+   double result = expression.value();
+
+   printf("Result: %10.5f\n",result);
+
+   return 0;
+}
+--- snip ---
 
 
 

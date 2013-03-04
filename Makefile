@@ -2,7 +2,7 @@
 # **************************************************************
 # *         C++ Mathematical Expression Toolkit Library        *
 # *                                                            *
-# * Author: Arash Partow (1999-2012)                           *
+# * Author: Arash Partow (1999-2013)                           *
 # * URL: http://www.partow.net/programming/exprtk/index.html   *
 # *                                                            *
 # * Copyright notice:                                          *
@@ -43,8 +43,8 @@ strip_bin:
 	strip -s exprtk_benchmark
 
 valgrind_check:
-	valgrind --leak-check=full --show-reachable=yes --track-origins=yes ./exprtk_test
-	valgrind --leak-check=full --show-reachable=yes --track-origins=yes ./exprtk_benchmark
+	valgrind --leak-check=full --show-reachable=yes --track-origins=yes -v ./exprtk_test
+	valgrind --leak-check=full --show-reachable=yes --track-origins=yes -v ./exprtk_benchmark
 
 clean:
 	rm -f core.* *~ *.o *.bak *stackdump gmon.out *.gcda *.gcno *.gcnor *.gch
