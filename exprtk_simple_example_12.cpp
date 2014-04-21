@@ -45,7 +45,7 @@ void bubble_sort()
                   "         };                                    "
                   "      };                                       "
                   "   };                                          "
-                  "   uppder_bound -= 1;                          "
+                  "   upper_bound -= 1;                           "
                   " until (not(swapped) or (upper_bound == 0));   ";
 
    T v[] = { T(2.2), T(1.1), T(5.5), T(4.4), T(3.3) };
