@@ -29,7 +29,12 @@
 #include "exprtk.hpp"
 
 
+#ifdef exprtk_test_float32_type
+typedef float numeric_type;
+#else
 typedef double numeric_type;
+#endif
+
 typedef std::pair<std::string,numeric_type> test_t;
 
 static const test_t global_test_list[] =
@@ -2750,7 +2755,7 @@ inline bool run_test04()
       }
    }
 
-   const T pi = T(3.14159265358979323846);
+   const T pi = T(3.141592653589793238462643383279502);
    const T increment = T(0.0001);
 
    while ((x <= T(+1000)) && (y <= T(+1000)))
@@ -2815,7 +2820,7 @@ inline bool run_test05()
       expression_list.push_back(e);
    }
 
-   const T pi = T(3.14159265358979323846);
+   const T pi = T(3.141592653589793238462643383279502);
    const T increment = T(0.001);
 
    while ((x <= T(+1000)) && (y <= T(+1000)))
@@ -2878,7 +2883,7 @@ inline bool run_test06()
 
    T total_area1 = exprtk::integrate(expression,x,T(-1),T(1));
    T total_area2 = exprtk::integrate(expression,"x",T(-1),T(1));
-   const T pi = T(3.14159265358979323846);
+   const T pi = T(3.141592653589793238462643383279502);
 
    if (not_equal(total_area1,total_area2,T(0.000001)))
    {
@@ -3188,6 +3193,8 @@ inline bool run_test08()
 template <typename T>
 struct myfunc : public exprtk::ifunction<T>
 {
+   using exprtk::ifunction<T>::operator();
+
    myfunc() : exprtk::ifunction<T>(2) {}
 
    inline T operator()(const T& v1, const T& v2)
@@ -3196,12 +3203,16 @@ struct myfunc : public exprtk::ifunction<T>
    }
 };
 
-double foo1(double v0) { return v0; }
-double foo2(double v0, double v1) { return v0 + v1; }
-double foo3(double v0, double v1, double v2) { return v0 + v1 + v2; }
-double foo4(double v0, double v1, double v2, double v3) { return v0 + v1 + v2 + v3; }
-double foo5(double v0, double v1, double v2, double v3, double v4) { return v0 + v1 + v2 + v3 + v4; }
-double foo6(double v0, double v1, double v2, double v3, double v4, double v5) { return v0 + v1 + v2 + v3 + v4 + v5; }
+#define define_free_functions(Type)                                                                     \
+Type foo1(Type v0) { return v0; }                                                                       \
+Type foo2(Type v0, Type v1) { return v0 + v1; }                                                         \
+Type foo3(Type v0, Type v1, Type v2) { return v0 + v1 + v2; }                                           \
+Type foo4(Type v0, Type v1, Type v2, Type v3) { return v0 + v1 + v2 + v3; }                             \
+Type foo5(Type v0, Type v1, Type v2, Type v3, Type v4) { return v0 + v1 + v2 + v3 + v4; }               \
+Type foo6(Type v0, Type v1, Type v2, Type v3, Type v4, Type v5) { return v0 + v1 + v2 + v3 + v4 + v5; } \
+
+define_free_functions(numeric_type)
+#undef define_free_functions
 
 template <typename T>
 inline bool run_test09()
@@ -3267,7 +3278,7 @@ inline bool run_test09()
             }
          }
 
-         const T pi = T(3.141592653589793238462);
+         const T pi = T(3.141592653589793238462643383279502);
 
          T result = expression.value();
 
@@ -4263,7 +4274,9 @@ inline bool run_test10()
         "7 == (for (var i := 0; i < 10; i += 1) { ~{break[7]; continue; i += i} })",
         "0 == (for (var i := 0; i < 10; i += 1) { ~{break[i]; continue; i += i} })",
         "0 == (for (var i := 0; i < 10; i += 1) { ~{continue; break[7]; i += i} })",
-        "1 == (for (var i := 0; i < 10; i += 1) { ~{break[i += 1]; continue; i += i} })"
+        "1 == (for (var i := 0; i < 10; i += 1) { ~{break[i += 1]; continue; i += i} })",
+
+        "var x[10^6] := null; var y[10^7] := null; 0 * (min(x) + min(y)) + x[] + y[] == 10^7 + 10^6"
       };
 
       const std::size_t expression_list_size = sizeof(expression_list) / sizeof(std::string);
@@ -4277,6 +4290,7 @@ inline bool run_test10()
 
       symbol_table.add_variable("zero",zero);
       symbol_table.add_variable("one" , one);
+      symbol_table.add_pi();
 
       bool failed = false;
 
@@ -4539,6 +4553,8 @@ inline bool run_test12()
 template <typename T>
 struct sine_deg : public exprtk::ifunction<T>
 {
+   using exprtk::ifunction<T>::operator();
+
    sine_deg() : exprtk::ifunction<T>(1) {}
 
    inline T operator()(const T& v)
@@ -4550,6 +4566,8 @@ struct sine_deg : public exprtk::ifunction<T>
 template <typename T>
 struct cosine_deg : public exprtk::ifunction<T>
 {
+   using exprtk::ifunction<T>::operator();
+
    cosine_deg() : exprtk::ifunction<T>(1) {}
 
    inline T operator()(const T& v)
@@ -4936,6 +4954,8 @@ inline bool run_test15()
 template <typename T>
 struct base_func : public exprtk::ifunction<T>
 {
+   using exprtk::ifunction<T>::operator();
+
    typedef const T& type;
    base_func(const std::size_t& n) : exprtk::ifunction<T>(n) {}
    inline T operator()(type v0, type v1, type v2, type v3, type v4) { return (v0 + v1 + v2 + v3 + v4); }
@@ -5242,6 +5262,8 @@ struct gen_func : public exprtk::igeneric_function<T>
    typedef typename generic_type::vector_view vector_t;
    typedef typename generic_type::string_view string_t;
 
+   using exprtk::igeneric_function<T>::operator();
+
    gen_func()
    : scalar_count(0),
      vector_count(0),
@@ -5292,10 +5314,12 @@ struct gen_func2 : public exprtk::igeneric_function<T>
 {
    typedef typename exprtk::igeneric_function<T>::parameter_list_t parameter_list_t;
 
+   using exprtk::igeneric_function<T>::operator();
+
    gen_func2()
    {}
 
-   inline T operator()(parameter_list_t&)
+   inline T operator()(parameter_list_t)
    {
       return T(0);
    }
@@ -5315,6 +5339,8 @@ struct inc_func : public exprtk::igeneric_function<T>
    typedef typename generic_type::scalar_view scalar_t;
    typedef typename generic_type::vector_view vector_t;
    typedef typename generic_type::string_view string_t;
+
+   using exprtk::igeneric_function<T>::operator();
 
    inc_func()
    {}
@@ -5374,6 +5400,8 @@ struct rem_space_and_uppercase : public exprtk::igeneric_function<T>
    typedef typename igenfunc_t::parameter_list_t parameter_list_t;
    typedef typename generic_type::string_view    string_t;
 
+   using exprtk::igeneric_function<T>::operator();
+
    rem_space_and_uppercase()
    : igenfunc_t("S",igenfunc_t::e_rtrn_string)
    {}
@@ -5416,6 +5444,8 @@ struct vararg_func : public exprtk::igeneric_function<T>
 
    typedef typename generic_type::scalar_view scalar_t;
    typedef typename generic_type::vector_view vector_t;
+
+   using exprtk::igeneric_function<T>::operator();
 
    vararg_func()
    : exprtk::igeneric_function<T>("Z|T*|V")
@@ -7010,6 +7040,47 @@ inline bool run_test19()
          printf("run_test19() - Prime Sieve Computation Error");
 
          return false;
+      }
+   }
+
+   {
+      symbol_table_t symbol_table;
+
+      symbol_table.add_constants();
+
+      std::string expression_str[] =
+                    {
+                      "var delta := 10^-7; var total := 0; for (var i := 0; i <= 3; i += delta) { total +=   "
+                      "erf(i) }; abs((delta * total) - (3 * erf(3) + (1 / exp(9) - 1) / sqrt(pi))) < 0.000001",
+
+                      "var delta := 10^-7; var total := 0; for (var i := 0; i <= 3; i += delta) { total +=  "
+                      "erfc(i) }; abs((delta * total) - (3 * erfc(3) + ((1 - 1 / exp(9)) / sqrt(pi)))) < 0.000001"
+                    };
+
+      expression_t e[2];
+
+      parser_t parser;
+
+      for (std::size_t i = 0; i < 2; ++i)
+      {
+         e[i].register_symbol_table(symbol_table);
+
+         if (!parser.compile(expression_str[i],e[i]))
+         {
+            printf("run_test19() - Error: %s   Expression: %s\n",
+                   parser.error().c_str(),
+                   expression_str[i].c_str());
+
+            return false;
+         }
+
+         if (T(1) != e[i].value())
+         {
+            printf("run_test19() - erf/erfc computation error %d",
+                   static_cast<unsigned int>(i));
+
+            return false;
+         }
       }
    }
 
