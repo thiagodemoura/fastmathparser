@@ -2483,7 +2483,7 @@ default USR. The following are some example expressions:
    (2) sine(y / 2) - coz(3x)
 
 
-The two  expression above  contain misspelt  symbols (abz,  sine, coz)
+The two  expressions above contain misspelt  symbols (abz,  sine, coz)
 which if implied  multiplications and default  USR are enabled  during
 compilation will result in them being assumed to be valid 'variables',
 which obviously is  not the intended  outcome by the  user. A possible
