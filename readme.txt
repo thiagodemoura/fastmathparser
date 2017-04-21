@@ -1325,7 +1325,7 @@ follows:
    var y := x + 2;  // Statement 2
    y := x + 3y;     // Statement 3
    x - y;           // Statement 4
-8
+
 
 (3) Conditional Statements (If-Then-Else)
 ExprTk support two forms  of conditional branching or  otherwise known
