@@ -84,7 +84,7 @@ arithmetic operations, functions and processes:
      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 [SECTION 02 - EXAMPLE EXPRESSIONS]
-The  following  is  a  short listing  of  the  types  of  mathematical
+The following is  a short listing  of infix format  based mathematical
 expressions that can be parsed and evaluated using the ExprTk library.
 
   (01) sqrt(1 - (3 / x^2))
